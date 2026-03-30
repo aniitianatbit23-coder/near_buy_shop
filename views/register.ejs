@@ -11,11 +11,15 @@
         .glass { background: rgba(255, 255, 255, 0.1); backdrop-filter: blur(15px); border: 1px solid rgba(255, 255, 255, 0.2); }
     </style>
 </head>
-<body class="bg-slate-900 min-h-screen text-white flex flex-col items-center justify-start md:justify-center py-10 px-6 relative overflow-x-hidden">
-    
-    <!-- Background gradients -->
-    <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-600 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"></div>
-    <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-600 rounded-full mix-blend-multiply filter blur-[150px] opacity-40"></div>
+<body class="bg-slate-900 min-h-screen text-white relative m-0 p-0 overflow-x-hidden">
+    <!-- Fixed Background Gradients -->
+    <div class="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-0 right-0 w-1/2 h-1/2 bg-blue-600 rounded-full mix-blend-multiply filter blur-[150px] opacity-20"></div>
+        <div class="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-600 rounded-full mix-blend-multiply filter blur-[150px] opacity-20"></div>
+    </div>
+
+    <!-- Main Scrollable Container -->
+    <div class="relative z-10 min-h-screen flex flex-col items-center justify-start md:justify-center py-12 px-6">
 
     <div class="glass w-full max-w-lg rounded-3xl p-8 relative z-10 shadow-2xl">
         <div class="text-center mb-8">
@@ -131,5 +135,6 @@
             }
         });
     </script>
+    </div>
 </body>
 </html>
