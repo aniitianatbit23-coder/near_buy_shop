@@ -1,0 +1,13 @@
+services:
+  - type: web
+    name: near-buy-shop
+    env: node
+    buildCommand: npm install && npx tailwindcss -i ./public/css/input.css -o ./public/css/style.css
+    startCommand: npm start
+    envVars:
+      - key: MONGO_URI
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: NODE_ENV
+        value: production
