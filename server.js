@@ -16,11 +16,20 @@ const server = http.createServer(app);
 const io = socketIo(server);
 
 // Configure web-push
-webpush.setVapidDetails(
-    process.env.VAPID_EMAIL || 'mailto:admin@nearbuyshop.com',
-    process.env.VAPID_PUBLIC_KEY,
-    process.env.VAPID_PRIVATE_KEY
-);
+try {
+    if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
+        webpush.setVapidDetails(
+            process.env.VAPID_EMAIL || 'mailto:admin@nearbuyshop.com',
+            process.env.VAPID_PUBLIC_KEY.trim(),
+            process.env.VAPID_PRIVATE_KEY.trim()
+        );
+        console.log('Web Push Notifications Configured');
+    } else {
+        console.warn('VAPID keys missing. Web Push notifications will not work.');
+    }
+} catch (err) {
+    console.error('Push notification setup error:', err.message);
+}
 
 // Socket.io connection state
 const connectedUsers = new Map();
