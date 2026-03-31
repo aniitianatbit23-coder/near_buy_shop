@@ -157,17 +157,28 @@
                                             <span class="px-2 inline-flex text-xs leading-5 font-semibold rounded-full border <%= colorClass %>">
                                                 <%= order.status.toUpperCase() %>
                                             </span>
-                                        </td>
-                                        <td class="p-4 text-right">
-                                            <form action="/shopkeeper/order/<%= order._id %>/update" method="POST" class="inline-flex items-center gap-2">
-                                                <select name="status" class="text-xs border-slate-300 bg-white rounded shadow-sm focus:ring-0">
-                                                    <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
-                                                    <option value="accepted" <%= order.status === 'accepted' ? 'selected' : '' %>>Accept</option>
-                                                    <option value="completed" <%= order.status === 'completed' ? 'selected' : '' %>>Complete</option>
-                                                    <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancel</option>
-                                                </select>
-                                                <button type="submit" class="bg-slate-800 text-white text-xs px-2 py-1.5 rounded hover:bg-slate-700 transition">Update</button>
-                                            </form>
+                                                                                 <td class="p-4 text-right">
+                                            <% if (order.status === 'accepted') { %>
+                                                <div class="flex items-center justify-end gap-2" id="otp-container-<%= order._id %>">
+                                                    <input type="text" id="otp-input-<%= order._id %>" placeholder="Enter OTP" 
+                                                           class="text-xs border-slate-300 rounded shadow-sm w-24 focus:ring-pink-500 focus:border-pink-500"
+                                                           maxlength="6">
+                                                    <button onclick="verifyOtp('<%= order._id %>')" 
+                                                            class="bg-pink-600 text-white text-xs px-3 py-1.5 rounded hover:bg-pink-700 transition font-bold shadow-sm">
+                                                        Verify & Complete
+                                                    </button>
+                                                </div>
+                                            <% } else { %>
+                                                <form action="/shopkeeper/order/<%= order._id %>/update" method="POST" class="inline-flex items-center gap-2">
+                                                    <select name="status" class="text-xs border-slate-300 bg-white rounded shadow-sm focus:ring-0">
+                                                        <option value="pending" <%= order.status === 'pending' ? 'selected' : '' %>>Pending</option>
+                                                        <option value="accepted" <%= order.status === 'accepted' ? 'selected' : '' %>>Accept</option>
+                                                        <option value="completed" <%= order.status === 'completed' ? 'selected' : '' %>>Complete</option>
+                                                        <option value="cancelled" <%= order.status === 'cancelled' ? 'selected' : '' %>>Cancel</option>
+                                                    </select>
+                                                    <button type="submit" class="bg-slate-800 text-white text-xs px-2 py-1.5 rounded hover:bg-slate-700 transition font-medium">Update</button>
+                                                </form>
+                                            <% } %>
                                         </td>
                                     </tr>
                                 <% }) %>
@@ -201,7 +212,37 @@
         const vapidPublicKey = "<%= vapidPublicKey %>";
         const audio = document.getElementById('notificationSound');
 
-        // Register user for real-time socket events
+        async function verifyOtp(orderId) {
+            const otpInput = document.getElementById(`otp-input-${orderId}`);
+            const otp = otpInput.value;
+            
+            if (!otp || otp.length < 6) {
+                alert('Please enter a valid 6-digit OTP');
+                return;
+            }
+
+            try {
+                const response = await fetch(`/order/${orderId}/verify-otp`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ otp })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert(result.message);
+                    window.location.reload();
+                } else {
+                    alert(result.error || 'Verification failed');
+                }
+            } catch (err) {
+                console.error('Error verifying OTP:', err);
+                alert('An error occurred during verification');
+            }
+        }
+
+        // Register user for real-time socket eventsevents
         socket.emit('register', userId);
 
         socket.on('newOrder', (data) => {

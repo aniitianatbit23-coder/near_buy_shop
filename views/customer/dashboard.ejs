@@ -43,6 +43,66 @@
     <!-- Main Content -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         
+        <!-- My Orders Section -->
+        <div class="mb-12">
+            <h2 class="text-2xl font-bold mb-6 text-slate-800 flex items-center">
+                <svg class="w-6 h-6 mr-2 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path></svg>
+                My Orders
+            </h2>
+            
+            <% if (orders && orders.length > 0) { %>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <% orders.forEach(order => { %>
+                        <div class="bg-white rounded-2xl shadow-sm border border-slate-200 p-6 hover:shadow-md transition-shadow relative overflow-hidden">
+                            <!-- Status Badge -->
+                            <div class="absolute top-0 right-0">
+                                <% 
+                                    const statusColors = {
+                                        pending: 'bg-yellow-100 text-yellow-800',
+                                        accepted: 'bg-blue-100 text-blue-800',
+                                        completed: 'bg-green-100 text-green-800',
+                                        cancelled: 'bg-red-100 text-red-800'
+                                    };
+                                    const colorClass = statusColors[order.status] || 'bg-slate-100';
+                                %>
+                                <span class="text-[10px] font-bold uppercase tracking-widest px-3 py-1 rounded-bl-xl <%= colorClass %>">
+                                    <%= order.status %>
+                                </span>
+                            </div>
+
+                            <h4 class="font-bold text-slate-900 mb-1"><%= order.shopId ? order.shopId.shopName : 'Unknown Shop' %></h4>
+                            <p class="text-xs text-slate-400 mb-4">Ordered on <%= new Date(order.createdAt).toLocaleDateString() %></p>
+                            
+                            <div class="space-y-2 mb-4">
+                                <% order.items.forEach(item => { %>
+                                    <div class="flex justify-between text-sm">
+                                        <span class="text-slate-600"><%= item.quantity %>x <%= item.name %></span>
+                                        <span class="font-medium">₹<%= item.price * item.quantity %></span>
+                                    </div>
+                                <% }) %>
+                            </div>
+
+                            <div class="border-t border-slate-100 pt-4 flex justify-between items-center">
+                                <div class="text-lg font-bold text-indigo-700">₹<%= order.totalAmount %></div>
+                                
+                                <% if (order.status !== 'completed' && order.status !== 'cancelled') { %>
+                                    <div class="bg-indigo-50 border border-indigo-100 rounded-lg px-3 py-1.5 text-center">
+                                        <p class="text-[10px] text-indigo-400 uppercase font-bold tracking-tighter">Your OTP</p>
+                                        <p class="text-lg font-mono font-bold text-indigo-600 tracking-widest"><%= order.otp %></p>
+                                    </div>
+                                <% } %>
+                            </div>
+                        </div>
+                    <% }) %>
+                </div>
+            <% } else { %>
+                <div class="bg-white rounded-2xl border-2 border-dashed border-slate-200 p-10 text-center">
+                    <p class="text-slate-500">You haven't placed any orders yet.</p>
+                    <a href="/customer/dashboard" class="mt-4 inline-block text-indigo-600 font-semibold hover:underline">Start shopping</a>
+                </div>
+            <% } %>
+        </div>
+
         <h2 class="text-2xl font-bold mb-6 text-slate-800">Available Services</h2>
         
         <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">

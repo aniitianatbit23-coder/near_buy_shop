@@ -1,5 +1,6 @@
 const User = require('../models/User');
 const Shop = require('../models/Shop');
+const Order = require('../models/Order');
 
 exports.getDashboard = async (req, res) => {
     try {
@@ -27,9 +28,15 @@ exports.getDashboard = async (req, res) => {
             nearbyShops = await Shop.find().limit(10);
         }
 
+        // Fetch User's Orders
+        const orders = await Order.find({ userId: req.user.id })
+            .populate('shopId', 'shopName')
+            .sort({ createdAt: -1 });
+
         res.render('customer/dashboard', { 
             user, 
             shops: nearbyShops,
+            orders: orders || [],
             queryMode
         });
     } catch (err) {

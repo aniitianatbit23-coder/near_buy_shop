@@ -48,7 +48,8 @@ exports.createOrder = async (req, res) => {
             shopId,
             items: processedItems,
             totalAmount,
-            paymentMethod: paymentMethod || 'cod'
+            paymentMethod: paymentMethod || 'cod',
+            otp: Math.floor(100000 + Math.random() * 900000).toString() // Generate 6-digit OTP
         });
 
         await newOrder.save();
@@ -78,7 +79,7 @@ exports.createOrder = async (req, res) => {
         if (shop.pushSubscription) {
             const payload = JSON.stringify({
                 title: 'New Order Received! 🛍️',
-                body: `${customerName} just ordered items worth ₹${totalAmount}.`,
+                body: `${customerName} just ordered items worth ₹${totalAmount}. OTP: ${newOrder.otp}`,
                 icon: '/images/logo.png',
                 url: '/shopkeeper/dashboard'
             });
@@ -87,17 +88,40 @@ exports.createOrder = async (req, res) => {
         }
 
         // 3. Simulated Email
-        console.log(`[SIMULATED EMAIL TO ${shop.email}] You have a new order: #${newOrder._id} for ₹${totalAmount}. Method: ${paymentMethod}`);
+        console.log(`[SIMULATED EMAIL TO ${shop.email}] You have a new order: #${newOrder._id} for ₹${totalAmount}. Method: ${paymentMethod}. OTP: ${newOrder.otp}`);
 
         res.render('customer/orderSuccess', { 
             orderId: newOrder._id, 
             total: totalAmount, 
             paymentMethod,
-            shopPhone: shop.phone
+            shopPhone: shop.phone,
+            otp: newOrder.otp
         });
 
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error during order creation');
+    }
+};
+
+exports.verifyOtp = async (req, res) => {
+    try {
+        const { orderId } = req.params;
+        const { otp } = req.body;
+
+        const order = await Order.findById(orderId);
+        if (!order) return res.status(404).json({ error: 'Order not found' });
+
+        if (order.otp !== otp) {
+            return res.status(400).json({ error: 'Invalid OTP. Please check with customer.' });
+        }
+
+        order.status = 'completed';
+        await order.save();
+
+        res.status(200).json({ message: 'Order verified and completed successfully!' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Verification failed' });
     }
 };

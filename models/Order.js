@@ -19,7 +19,8 @@ const orderSchema = new mongoose.Schema({
         default: 'pending' 
     },
     paymentId: { type: String }, // For Razorpay mock/real order ID
-    deliveryAddress: { type: String }
+    deliveryAddress: { type: String },
+    otp: { type: String } // Added for order completion verification
 }, { timestamps: true });
 
 module.exports = mongoose.model('Order', orderSchema);
