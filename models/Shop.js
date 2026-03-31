@@ -37,7 +37,8 @@ const shopSchema = new mongoose.Schema({
     orders: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order'
-    }]
+    }],
+    pushSubscription: { type: Object } // Added for mobile notifications
 }, { timestamps: true });
 
 // Extremely important for `$near` geospatial queries

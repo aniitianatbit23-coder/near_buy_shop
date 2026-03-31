@@ -8,7 +8,12 @@ exports.getDashboard = async (req, res) => {
             .populate('userId', 'name email phone')
             .sort({ createdAt: -1 });
 
-        res.render('shopkeeper/dashboard', { shop, orders });
+        res.render('shopkeeper/dashboard', { 
+            shop, 
+            orders, 
+            userId: req.user.id,
+            vapidPublicKey: process.env.VAPID_PUBLIC_KEY
+        });
     } catch (err) {
         console.error(err);
         res.status(500).send('Server Error');

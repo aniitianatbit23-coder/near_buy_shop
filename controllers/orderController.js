@@ -2,6 +2,7 @@ const Order = require('../models/Order');
 const Shop = require('../models/Shop');
 const User = require('../models/User');
 const nodemailer = require('nodemailer');
+const webpush = require('web-push');
 
 // Set up Nodemailer transporter (Mock for now, logging to console)
 const transporter = nodemailer.createTransport({
@@ -19,7 +20,6 @@ exports.createOrder = async (req, res) => {
         const userId = req.user.id;
 
         // Process items from the form data structure
-        // The data comes in as items[serviceId][quantity]...
         const processedItems = [];
         let totalAmount = 0;
 
@@ -53,12 +53,40 @@ exports.createOrder = async (req, res) => {
 
         await newOrder.save();
 
-        // Push to relative user arrays (optional depending on MongoDB structure)
+        // Update counts
+        const customer = await User.findById(userId);
         await User.findByIdAndUpdate(userId, { $push: { orders: newOrder._id } });
-        await Shop.findByIdAndUpdate(shopId, { $push: { orders: newOrder._id } });
+        const shop = await Shop.findByIdAndUpdate(shopId, { $push: { orders: newOrder._id } });
 
-        // Simulate Nodemailer sending an Email to Shopkeeper
-        const shop = await Shop.findById(shopId);
+        // --- NOTIFICATIONS ---
+        const customerName = customer ? customer.name : 'A customer';
+        
+        // 1. Real-time Socket.io notification
+        const io = req.app.get('socketio');
+        const connectedUsers = req.app.get('connectedUsers');
+        const shopSocketId = connectedUsers.get(shopId.toString());
+        
+        if (shopSocketId) {
+            io.to(shopSocketId).emit('newOrder', {
+                orderId: newOrder._id,
+                total: totalAmount,
+                customer: customerName
+            });
+        }
+
+        // 2. Web Push Notification (Mobile/Background)
+        if (shop.pushSubscription) {
+            const payload = JSON.stringify({
+                title: 'New Order Received! 🛍️',
+                body: `${customerName} just ordered items worth ₹${totalAmount}.`,
+                icon: '/images/logo.png',
+                url: '/shopkeeper/dashboard'
+            });
+            webpush.sendNotification(shop.pushSubscription, payload)
+                .catch(err => console.error('Push notification error:', err));
+        }
+
+        // 3. Simulated Email
         console.log(`[SIMULATED EMAIL TO ${shop.email}] You have a new order: #${newOrder._id} for ₹${totalAmount}. Method: ${paymentMethod}`);
 
         res.render('customer/orderSuccess', { 

@@ -21,7 +21,8 @@ const userSchema = new mongoose.Schema({
     orders: [{
         type: mongoose.Schema.Types.ObjectId,
         ref: 'Order'
-    }]
+    }],
+    pushSubscription: { type: Object } // Added for mobile notifications
 }, { timestamps: true });
 
 // Index for getting users by location if needed, though usually we query shops by location
