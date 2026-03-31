@@ -20,8 +20,8 @@ try {
     if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
         webpush.setVapidDetails(
             process.env.VAPID_EMAIL || 'mailto:admin@nearbuyshop.com',
-            process.env.VAPID_PUBLIC_KEY.trim(),
-            process.env.VAPID_PRIVATE_KEY.trim()
+            process.env.VAPID_PUBLIC_KEY.replace(/\s/g, ''),
+            process.env.VAPID_PRIVATE_KEY.replace(/\s/g, '')
         );
         console.log('Web Push Notifications Configured');
     } else {
