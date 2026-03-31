@@ -16,7 +16,7 @@ const transporter = nodemailer.createTransport({
 
 exports.createOrder = async (req, res) => {
     try {
-        const { shopId, items, paymentMethod } = req.body;
+        const { shopId, items, paymentMethod, deliveryAddress } = req.body;
         const userId = req.user.id;
 
         // Process items from the form data structure
@@ -49,6 +49,7 @@ exports.createOrder = async (req, res) => {
             items: processedItems,
             totalAmount,
             paymentMethod: paymentMethod || 'cod',
+            deliveryAddress,
             otp: Math.floor(100000 + Math.random() * 900000).toString() // Generate 6-digit OTP
         });
 

@@ -30,7 +30,7 @@ exports.getDashboard = async (req, res) => {
 
         // Fetch User's Orders
         const orders = await Order.find({ userId: req.user.id })
-            .populate('shopId', 'shopName')
+            .populate('shopId', 'shopName phone')
             .sort({ createdAt: -1 });
 
         res.render('customer/dashboard', { 
